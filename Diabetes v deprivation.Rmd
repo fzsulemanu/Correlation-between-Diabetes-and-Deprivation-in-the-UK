@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+output: html_document
+date: "2026-05-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+library(tidyverse)
+
+#Load Excel files into Rstudio
+setwd("C:/Users/fsule/Desktop")
+nhs_diabetes <- read.csv("diabetes.csv")
+nhs_deprivation_icb <- read.csv("deprivation_icb.csv")
+
+#Remove extra spaces before merging both documents
+nhs_diabetes$ICB.name <- trimws(nhs_diabetes$ICB.name)
+nhs_diabetes$ICB.name <- gsub("Hampshire and the Isle of Wight", "Hampshire and Isle of Wight", nhs_diabetes$ICB.name)
+
+#Merge both files
+merged_data <- merge(nhs_diabetes, nhs_deprivation_icb, by.x = "ICB.name", by.y = "Integrated.Care.Board.Name..2024.")
+
+#Correlation
+cor.test(merged_data$IMD...Average.score, merged_data$Prevalence....)
+
+#Scatterplot
+ggplot(merged_data, aes(x = IMD...Average.score, y = Prevalence....)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "There is a positive correlation between deprivation and diabetes prevalence",
+    x = "Deprivation",
+    y = "Prevalence")
+#save
+ggsave("deprivation_correlation.png")
+    
+#Barchart
+ggplot(merged_data, aes(x = reorder(ICB.name, Prevalence....), y = Prevalence....)) +
+  geom_col() +
+  theme_minimal() +
+  labs(
+    title = "NHS Black Country ICB had the highest prevalance of diabetes",
+    x = "ICB Name",
+    y = "Prevalence") +
+  coord_flip()
+#save plot
+ggsave("diabetes_prevalence.png")
